@@ -1,4 +1,4 @@
-package mdtable
+package downtable
 
 import (
 	"encoding/csv"
