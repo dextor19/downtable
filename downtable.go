@@ -1,3 +1,28 @@
+/*
+package downtable generates markdown tables from csv and json files.
+there is methods for modifying the table data before generating the markdown table.
+
+to parse an csv file as a input for the markdown table you need to use the [WithCSVFile] function inside of the [AddTable] method on the [MarkdownTable] interface.
+csv data needs to have the first row be the headers and the subsequent rows will be general rows within the table.
+
+  "header1, header2,header3,\nrow1item1, row1item2, row1item3\n"
+
+when using providing a csv file you need to enable formatting options based on the type of csv file,
+options `lazyQuotes` " double quotes are allowed in csv fields and `trimLeadingQuotes` leading white spaces in the csv field is ignored.
+
+json files are also able to provided as input for markdown tables, using the [MarkdownTable] method [AddJSONFileTable].
+
+to parse json files the package requires the following format:
+
+  {
+    "Headers": ["header1"],
+    "Rows": [["row1item1"], ["row2item1"]]
+  }
+
+main idea is to use the [MarkdownTable] interface to parse array strings and produce a string of markdown that represents a table.
+
+
+*/
 package downtable
 
 import (
@@ -9,18 +34,52 @@ import (
 	"strings"
 )
 
+// MarkdownTable interface defines all the methods that consumers of this package
+// can use to generate a markdown table string.
 type MarkdownTable interface {
+	// AddHeader adds a single string to the end of the headers string array
 	AddHeader(string)
+
+	// AddHeaders replaces the array of strings in table instance with new array of strings
+	// that will be used as headers for the markdown table.
 	AddHeaders([]string)
+
+	// DeleteHeaders removes all items inside the array of strings for table.headers
 	DeleteHeaders()
+
+	// AddRowItem adds a single items to one row in the matrix of arrays for table.rows.
+	// requires an input specifying which row in the matrix this string will be appended too.
 	AddRowItem(string, int)
+
+	// AddRow will append an addition row to the matrix of strings for table.rows.
 	AddRow([]string) error
+
+	// AddRows will replace all matrix of strings with a new matrix for table.rows.
 	AddRows([][]string)
+
+	// DeleteRows will delete the matrix of strings in table.rows.
 	DeleteRows()
+
+	// AddTable takes a matrix of strings as input and will use the first row in the matrix
+	// as the headers list of strings and replace existing headers. all other rows will be
+	// appended to the matrix of strings for table.rows.
+	//
+	// AddTable requires that the headers and rows have the same number of items in the string array
+	// otherwise error will occur saying that header and row arrays need to have the same length.
 	AddTable([][]string, error) error
+
+	// AddJSONFileTable takes a file pointer as input requires the file associated with the
+	// pointer contains a json formatted object and has a specific Headers and Rows structure.
+	// this method will replace existing headers in the table instance.
 	AddJSONFileTable(*os.File) error
+
+	// GetMarkdownTableString a single string of the markdown table via the standard output.
 	GetMarkdownTableString() (string, error)
+
+	// GetMarkdownTableString outputs a single string of the markdown table.
 	GetMarkdownTable() ([]byte, error)
+
+	// GetMarkdownTable outputs a byte array containing a single string of the markdown table.
 	PrintMarkdownTable() (int, error)
 }
 
@@ -158,12 +217,21 @@ func (t *table) GetMarkdownTable() ([]byte, error) {
 	return []byte(mdtString), nil
 }
 
+// NewMarkdownTable initiates a empty instance of a [table] struct with a [MarkdownTable] interface
+// that allows you to modify the data within the [table] instance using getter and setter methods or
+// formatted data files.
 func NewMarkdownTable() MarkdownTable {
 	var mdt MarkdownTable
 	mdt = &table{}
 	return mdt
 }
 
+// WithCSVFile takes a file pointer with csv reader options as parameters to the function and
+// outputs a matrix of strings which the first row in the matrix is the headers and the other
+// rows are row items for the markdown table.
+//
+// the matrix of strings output is meant for the MarkdownTable.AddTable() method which populates [table]
+// struct instances using matrix of strings.
 func WithCSVFile(file *os.File, lazyQuotes bool, trimLeadingSpace bool) ([][]string, error) {
 	csvReader := csv.NewReader(file)
 	csvReader.LazyQuotes = lazyQuotes
