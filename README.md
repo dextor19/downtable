@@ -85,7 +85,7 @@ func main() {
     if _, err := tmpFile.Seek(0, 0); err != nil {
         log.Fatal(err)
     }
-    mdt.AddTable(downtable.WithCSVFile(tmpFile, true, true))
+    mdt.AddTableFromCSVFile(tmpFile, true, true)
     _, err = mdt.PrintMarkdownTable()
     if err != nil {
         log.Fatal(err)
