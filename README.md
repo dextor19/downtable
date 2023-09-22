@@ -10,11 +10,11 @@ package downtable generates markdown tables from csv and json files. there is me
 
 ### Parsing CSV File
 
-Providing an CSV file as a input for the markdown table you need to use the `WithCSVFile(*os.File, lazyQuotes: bool, trimLeadingQuotes: bool)` function inside of the `AddTable()` method on the `MarkdownTable` interface. When using providing a CSV file you need to enable formatting options based on the type of CSV file, options `lazyQuotes` " double quotes are allowed in csv fields and `trimLeadingQuotes` leading white spaces in the csv field is ignored.
+Providing an CSV file as a input for the markdown table you need to use the `AddTableFromCSVFile(*os.File, lazyQuotes: bool, trimLeadingQuotes: bool)` method inside of the `MarkdownTable` interface. When using providing a CSV file you need to enable formatting options based on the type of CSV file, options `lazyQuotes` " double quotes are allowed in csv fields and `trimLeadingQuotes` leading white spaces in the csv field is ignored.
 
 ### Parsing JSON Files
 
-JSON files are also able to provided as input for markdown tables, using the `MarkdownTable` method `AddJSONFileTable(*os.File)`.
+JSON files are also able to provided as input for markdown tables, using the `MarkdownTable` method `AddTableFromJSONFile(*os.File)`.
 
 Parse a JSON file it requires a specific format:
 
@@ -134,7 +134,7 @@ func main() {
     if _, err := tmpFile.Seek(0, 0); err != nil {
         log.Fatal(err)
     }
-    mdt.AddJSONFileTable(tmpFile)
+    mdt.AddTableFromJSONFile(tmpFile)
     _, err = mdt.PrintMarkdownTable()
     if err != nil {
         log.Fatal(err)
