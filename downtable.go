@@ -66,12 +66,19 @@ type MarkdownTable interface {
 	//
 	// AddTable requires that the headers and rows have the same number of items in the string array
 	// otherwise error will occur saying that header and row arrays need to have the same length.
-	AddTable([][]string, error) error
+	AddTable([][]string) error
 
-	// AddJSONFileTable takes a file pointer as input requires the file associated with the
+	// AddTableFromJSONFile takes a file pointer as input requires the file associated with the
 	// pointer contains a json formatted object and has a specific Headers and Rows structure.
 	// this method will replace existing headers in the table instance.
-	AddJSONFileTable(*os.File) error
+	AddTableFromJSONFile(*os.File) error
+
+	// AddTableFromCSVFile takes a file pointer with csv reader options as parameters to the function and
+	// parses the matrix of strings which the first row in the matrix is the headers and the other
+	// rows are row items for the markdown table.
+	//
+	// the matrix of strings then populate the table struct using the AddTable() method.
+	AddTableFromCSVFile(*os.File, bool, bool) error
 
 	// GetMarkdownTableString a single string of the markdown table via the standard output.
 	GetMarkdownTableString() (string, error)
@@ -120,10 +127,7 @@ func (t *table) DeleteRows() {
 	t.rows = [][]string{}
 }
 
-func (t *table) AddTable(rows [][]string, err error) error {
-	if err != nil {
-		return err
-	}
+func (t *table) AddTable(rows [][]string) error {
 	if len(rows) == 0 {
 		return fmt.Errorf("AddTable provided rows are empty")
 	}
@@ -150,7 +154,7 @@ type jsonTable struct {
 	Rows    [][]string
 }
 
-func (t *table) AddJSONFileTable(file *os.File) error {
+func (t *table) AddTableFromJSONFile(file *os.File) error {
 	jsonData, err := io.ReadAll(file)
 	if err != nil {
 		return err
@@ -162,6 +166,21 @@ func (t *table) AddJSONFileTable(file *os.File) error {
 	}
 	t.AddHeaders(jt.Headers)
 	t.AddRows(jt.Rows)
+	return nil
+}
+
+func (t *table) AddTableFromCSVFile(file *os.File, lazyQuotes bool, trimLeadingSpace bool) error {
+	csvReader := csv.NewReader(file)
+	csvReader.LazyQuotes = lazyQuotes
+	csvReader.TrimLeadingSpace = trimLeadingSpace
+	csvRows, err := csvReader.ReadAll()
+	if err != nil {
+		return err
+	}
+	err = t.AddTable(csvRows)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -224,21 +243,4 @@ func NewMarkdownTable() MarkdownTable {
 	var mdt MarkdownTable
 	mdt = &table{}
 	return mdt
-}
-
-// WithCSVFile takes a file pointer with csv reader options as parameters to the function and
-// outputs a matrix of strings which the first row in the matrix is the headers and the other
-// rows are row items for the markdown table.
-//
-// the matrix of strings output is meant for the MarkdownTable.AddTable() method which populates [table]
-// struct instances using matrix of strings.
-func WithCSVFile(file *os.File, lazyQuotes bool, trimLeadingSpace bool) ([][]string, error) {
-	csvReader := csv.NewReader(file)
-	csvReader.LazyQuotes = lazyQuotes
-	csvReader.TrimLeadingSpace = trimLeadingSpace
-	csvRows, err := csvReader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-	return csvRows, nil
 }

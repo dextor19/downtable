@@ -33,7 +33,7 @@ func TestCSVFileInputAndGetMarkdownTableByte(t *testing.T) {
 		t.Errorf("got: %q", err)
 	}
 	os.Stdin = tmpFile
-	mdt.AddTable(WithCSVFile(os.Stdin, lazyQuotes, trimLeadingQuotes))
+	mdt.AddTableFromCSVFile(os.Stdin, lazyQuotes, trimLeadingQuotes)
 	got, err := mdt.GetMarkdownTable()
 	if err != nil {
 		t.Errorf("got: %q", err)
@@ -60,7 +60,7 @@ func TestCSVFileInputAndGetMarkdownTableString(t *testing.T) {
 		t.Errorf("got: %q", err)
 	}
 	os.Stdin = tmpFile
-	mdt.AddTable(WithCSVFile(os.Stdin, lazyQuotes, trimLeadingQuotes))
+	mdt.AddTableFromCSVFile(os.Stdin, lazyQuotes, trimLeadingQuotes)
 	got, err := mdt.GetMarkdownTableString()
 	if err != nil {
 		t.Errorf("got: %q", err)
@@ -94,7 +94,7 @@ func TestJSONFileInputAndGetMarkdownTableByte(t *testing.T) {
 		t.Errorf("got: %q", err)
 	}
 	os.Stdin = tmpFile
-	mdt.AddJSONFileTable(os.Stdin)
+	mdt.AddTableFromJSONFile(os.Stdin)
 	got, err := mdt.GetMarkdownTable()
 	if err != nil {
 		t.Errorf("got: %q", err)
@@ -188,7 +188,7 @@ func TestAddTableEmptyStringMatrix(t *testing.T) {
 	input := [][]string{{}, {}, {}, {}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
 		t.Errorf("got: %d want %d", got, want)
@@ -201,7 +201,7 @@ func TestAddTableOnlyHeaders(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name", "blood type"}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
 		t.Errorf("got: %d want %d", got, want)
@@ -214,7 +214,7 @@ func TestAddTableHeadersAndEmptyRows(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name", "blood type"}, {}, {}, {}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
 		t.Errorf("got: %d want %d", got, want)
@@ -227,7 +227,7 @@ func TestAddTableHeadersAndRows(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}}
 	want := 214
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
 		t.Errorf("got: %d want %d", got, want)
@@ -240,7 +240,7 @@ func TestAddTableFourHeadersAndRowsWithFiveItems(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name"}, {"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
 		t.Errorf("got: %d want %d", got, want)
@@ -253,7 +253,7 @@ func TestAddTableFiveHeadersAndRowsWithFourItems(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name"}, {"month", "age", "gender", "name"}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
 		t.Errorf("got: %d want %d", got, want)
@@ -266,7 +266,7 @@ func TestDeleteHeaders(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	mdt.DeleteHeaders()
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
@@ -280,7 +280,7 @@ func TestDeleteRows(t *testing.T) {
 	input := [][]string{{"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}, {"month", "age", "gender", "name", "blood type"}}
 	want := 0
 	mdt := NewMarkdownTable()
-	_ = mdt.AddTable(input, nil)
+	_ = mdt.AddTable(input)
 	mdt.DeleteRows()
 	got, _ := mdt.PrintMarkdownTable()
 	if got != want {
